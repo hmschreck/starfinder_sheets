@@ -1,0 +1,191 @@
+<!-- Starfinder Character Sheet -->
+<!-- Set Levels Data -->
+{% set ability = {
+    "strength": {
+        "score": variables.strength,
+        "modifier": (variables.strength -10) // 2,
+        "upgraded": variables.upgraded_strength,
+        "upgraded_modifier": max((variables.upgraded_strength - 10) // 2, 0)
+    },
+    "dexterity": {
+        "score": variables.dexterity,
+        "modifier": (variables.dexterity -10) // 2,
+        "upgraded": variables.upgraded_dexterity,
+        "upgraded_modifier": max((variables.upgraded_dexterity - 10) // 2, 0)
+    },
+    "constitution": {
+        "score": variables.constitution,
+        "modifier": (variables.constitution -10) // 2,
+        "upgraded": variables.upgraded_constitution,
+        "upgraded_modifier": max((variables.upgraded_constitution - 10) // 2, 0)
+    },
+    "intelligence": {
+        "score": variables.intelligence,
+        "modifier": (variables.intelligence -10) // 2,
+        "upgraded": variables.upgraded_intelligence,
+        "upgraded_modifier": max((variables.upgraded_intelligence - 10) // 2, 0)
+    },
+    "wisdom": {
+        "score": variables.wisdom,
+        "modifier": (variables.wisdom -10) // 2,
+        "upgraded": variables.upgraded_wisdom,
+        "upgraded_modifier": max((variables.upgraded_wisdom - 10) // 2, 0)
+    },
+    "charisma": {
+        "score": variables.charisma,
+        "modifier": (variables.charisma -10) // 2,
+        "upgraded": variables.upgraded_charisma,
+        "upgraded_modifier": max((variables.upgraded_charisma - 10) // 2, 0)
+    }
+} %}
+{% set character = {
+    "name": variables.name,
+    "race": variables.race,
+    "theme": variables.theme,
+    "home world": variables.home_world,
+    "size": variables.size,
+    "gender": variables.gender,
+    "speed": variables.speed,
+    "alignment": variables.alignment,
+    "deity": variables.deity,
+    "player": variables.player
+}%}
+{% set levels = [] %}
+{% set level_totals = {} %}
+{% if variables.level_data is defined %}
+    {% set total_levels = 0 %}
+    {% set total_skill_points = 0 %}
+    {% set total_base_attack_bonus = 0 %}
+    {% set total_fortitude = 0 %}
+    {% set total_reflex = 0 %}
+    {% set total_will = 0 %}
+    {% set total_hit_points = 0 %}
+    {% set total_stamina = 0 %}
+    {% set dataRows = variables.level_data|trim|split(';') %}
+    {% for dataStringRow in dataRows %}
+        {% if dataStringRow is defined and dataStringRow|length > 0 %}
+            {% set valueTab = dataStringRow|trim|split('|') %}
+            {% set total_levels = total_levels + valueTab[1]%}
+            {% set total_skill_points = total_skill_points + valueTab[2] %}
+            {% set total_base_attack_bonus = total_base_attack_bonus + valueTab[3] %}
+            {% set total_fortitude = total_fortitude + valueTab[4] %}
+            {% set total_reflex = total_reflex + valueTab[5] %}
+            {% set total_will = total_will + valueTab[6] %}
+            {% set total_hit_points = total_hit_points + valueTab[7] %}
+            {% set total_stamina = total_stamina + valueTab[8] %}
+            {% set levels = levels|merge([{
+                "class": valueTab[0],
+                "level": valueTab[1],
+                "skill points": valueTab[2],
+                "base attack bonus": valueTab[3],
+                "fortitude": valueTab[4],
+                "reflex": valueTab[5],
+                "will": valueTab[6],
+                "hit points": valueTab[7],
+                "stamina": valueTab[8]
+            }]) %}
+        {% endif %}
+    {% endfor %}
+    {% set level_totals = {
+        "level": total_levels,
+        "skill points": total_skill_points,
+        "base attack bonus": total_base_attack_bonus,
+        "fortitude": total_fortitude,
+        "reflex": total_reflex,
+        "will": total_will,
+        "hit points": total_hit_points,
+        "stamina": total_stamina
+    } %}
+{% endif %}
+<!-- Macros defined here -->
+<!-- Display class table -->
+{% macro displayFullClassLevelTable(levels_in, totals) %}
+    <!-- Name, Level, Skill Points, Base Attack Bonus, Fort Save, Ref Save, Will Save, HP, Stamina -->
+    <div class="row">
+        <div class="col-md-12 ability-table">
+            <div class="row level-header-row">
+                <div class="col-md-2 level-header">Class</div>
+                <div class="col-md-1 level-header">Level</div>
+                <div class="col-md-1 level-header">Skill Points</div>
+                <div class="col-md-1 level-header">Base Attack Bonus</div>
+                <div class="col-md-1 level-header">Fortitude</div>
+                <div class="col-md-1 level-header">Reflex</div>
+                <div class="col-md-1 level-header">Will</div>
+                <div class="col-md-1 level-header">Hit Points</div>
+                <div class="col-md-1 level-header">Stamina</div>
+            </div>
+            {% for classData in levels_in %}
+                <div class="row level-row">
+                    <div class="col-md-2 level-data-row">{{ classData["class"] | title }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["level"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["skill points"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["base attack bonus"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["fortitude"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["reflex"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["will"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["hit points"] }}</div>
+                    <div class="col-md-1 level-data-row">{{ classData["stamina"] }}</div>
+                </div>
+            {% endfor %}
+            <div class="row level-row total-row">
+                <div class="col-md-2 level-data-row">{{ "Total" | title }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["level"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["skill points"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["base attack bonus"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["fortitude"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["reflex"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["will"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["hit points"] }}</div>
+                <div class="col-md-1 level-data-row">{{ totals["stamina"] }}</div>
+            </div>
+        </div>
+    </div>
+
+{% endmacro %}
+{% macro displayCharacterInfo(character_info, levels_in) %}
+    <div class="row character-info">
+        <div class="row">
+            <div class="col-md-4 name"><strong>Name</strong> {{ character_info["name"] }} </div>
+            <div class="col-md-4 theme"><strong>Theme</strong>{{ character_info["theme"] }}</div>
+            <div class="col-md-4 race"><strong>Race</strong>{{ character_info["race"] }}</div>
+        </div>
+        <div class="row classes"><strong>Classes</strong> {% for class in levels_in %}{% if class["class" not in ["Bonus"]] %}{{ class["class"] }} - {{ class["level"] }}{% endif %}{% endfor %}</div>
+        <div class="row">
+            <div class="col-md-6 home-world"><strong>Home World</strong> {{ character_info["home world"] }} </div>
+            <div class="col-md-3 size"><strong>Size</strong> {{ character_info["size"] }}</div>
+            <div class="col-md-3 gender"><strong>Gender</strong> {{ character_info["gender"] }}</div>
+        </div>
+        <div class="row">
+            <div class="col-md-3 speed"><strong>Speed</strong> {{ character_info["speed"] }}</div>
+            <div class="col-md-5 alignment"><strong>Alignment</strong>{{ character_info["alignment"] }}></div>
+            <div class="col-md-4 deity"><strong>Deity</strong> {{ character_info["deity"] }}</div>
+        </div>
+        <div class="row player"><strong>Player</strong> {{ character_info["player"] }}</div>
+    </div>
+{% endmacro %}
+{% macro displayAbilityScores(abilities) %}
+    <div>
+        <div class="row">
+            <div class="col-md-4">Ability</div>
+            <div class="col-md-2">Score</div>
+            <div class="col-md-2">Modifier</div>
+            <div class="col-md-2">Upgraded Score</div>
+            <div class="col-md-2">Upgraded Modifier</div>
+        </div>
+        {% for stat in abilities|keys %}
+        <div class="row">
+            <div class="col-md-4">{{ stat | title }}</div>
+            <div class="col-md-2">{{ abilities[stat]["score"] }}</div>
+            <div class="col-md-2">{{ abilities[stat]["modifier"] }}</div>
+            <div class="col-md-2">{{ abilities[stat]["upgraded"] }}</div>
+            <div class="col-md-2">{{ abilities[stat]["upgraded_modifier"] }}</div>
+        </div>
+        {% endfor %}
+    </div>
+{% endmacro %}
+{% import _self as macros %}
+<div>
+    {{ macros.displayCharacterInfo(character, levels) }}
+    {{ macros.displayFullClassLevelTable(levels, level_totals) }}
+    {{ macros.displayAbilityScores(ability) }}
+</div>
